@@ -1,0 +1,31 @@
+name: Lotto Notifier
+
+on:
+  schedule:
+    # Esegue ogni giorno alle 21:30 UTC (modifica in base al tuo fuso orario)
+    - cron: "30 19 * * *"
+  workflow_dispatch: # permette anche l’esecuzione manuale
+
+jobs:
+  lotto-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.10
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests beautifulsoup4 lxml
+
+    - name: Run Lotto Script
+      env:
+        EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        DESTINATARIO: ${{ secrets.DESTINATARIO }}
+      run: python lotto.py
