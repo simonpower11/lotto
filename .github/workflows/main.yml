@@ -3,7 +3,7 @@ name: Lotto Notifier
 on:
   schedule:
     # Esegue ogni giorno alle 21:30 UTC (modifica secondo il tuo fuso)
-    - cron: "30 19 * * *"
+    - cron: ""0 19 * * *""
   workflow_dispatch: # permette anche esecuzione manuale
 
 jobs:
