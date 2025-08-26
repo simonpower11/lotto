@@ -1,67 +1,35 @@
-name: Lotto Notifier Test
+name: Lotto Notifier
 
 on:
-  workflow_dispatch: # permette l'esecuzione manuale per test
+  schedule:
+    # Esegue ogni giorno alle 21:30 UTC (modifica secondo il tuo fuso)
+    - cron: "30 19 * * *"
+  workflow_dispatch: # permette anche esecuzione manuale
 
 jobs:
   lotto-job:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      # 1️⃣ Scarica il repository
+      - uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
+      # 2️⃣ Imposta Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests beautifulsoup4 lxml
+      # 3️⃣ Installa dipendenze
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 lxml
 
-    - name: Run Lotto Script (Test)
-      env:
-        EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
-        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-        DESTINATARIO: ${{ secrets.DESTINATARIO }}
-      run: |
-        python - <<'EOF'
-        import requests
-        from bs4 import BeautifulSoup
-        import urllib3
-
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-        NUMERI_GIOCATI = {5, 12, 23, 45, 67}
-        RUOTA = "Bari"
-
-        def get_estrazione_bari():
-            url = "https://www.lottomaticaitalia.it/lotto/estrazioni-del-lotto"
-            try:
-                r = requests.get(url, verify=False)
-            except Exception as e:
-                print("Errore download estrazione:", e)
-                return []
-            soup = BeautifulSoup(r.text, "html.parser")
-            tabelle = soup.find_all("table")
-            for tab in tabelle:
-                caption = tab.find("caption")
-                if caption and caption.text.strip() == RUOTA:
-                    numeri = [int(td.text.strip()) for td in tab.find_all("td") if td.text.strip().isdigit()]
-                    return numeri
-            return []
-
-        estratti = get_estrazione_bari()
-        print("Numeri estratti:", estratti)
-
-        if not estratti:
-            print("❌ Nessuna estrazione trovata")
-        else:
-            vincenti = NUMERI_GIOCATI & set(estratti)
-            print("I tuoi numeri giocati:", sorted(NUMERI_GIOCATI))
-            if vincenti:
-                print("🎉 Hai indovinato:", sorted(vincenti))
-            else:
-                print("📢 Nessuna corrispondenza oggi")
-        EOF
+      # 4️⃣ Esegui lo script reale
+      - name: Run Lotto Script
+        env:
+          EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          DESTINATARIO: ${{ secrets.DESTINATARIO }}
+        run: python lotto.py
